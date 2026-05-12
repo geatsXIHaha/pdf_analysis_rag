@@ -80,6 +80,7 @@ export async function sendChat(payload: {
   doc_id: string;
   message: string;
   session_id?: string | null;
+  strict_mode?: boolean;
 }): Promise<{ answer: string; session_id: string; sources: { page: number; snippet: string }[] }> {
   return request("/api/chat", {
     method: "POST",

@@ -119,6 +119,7 @@ def chat(request: ChatRequest) -> ChatResponse:
             doc_id=request.doc_id,
             question=request.message,
             session_id=request.session_id,
+            strict_mode=request.strict_mode,
         )
         return ChatResponse(**response)
     except RuntimeError as exc:

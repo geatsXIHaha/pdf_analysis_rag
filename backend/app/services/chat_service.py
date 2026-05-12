@@ -24,7 +24,13 @@ class ChatService:
             )
         return self.memories[session_id]
 
-    def ask(self, doc_id: str | None, question: str, session_id: str | None = None) -> Dict:
+    def ask(
+        self,
+        doc_id: str | None,
+        question: str,
+        session_id: str | None = None,
+        strict_mode: bool = True,
+    ) -> Dict:
         session_id = session_id or str(uuid4())
         memory = self._get_memory(session_id)
 
@@ -63,22 +69,42 @@ class ChatService:
             temperature=0.2,
         )
 
+        strict_prompt = (
+            "You are a smart document assistant for a PDF-based RAG system. "
+            "First classify the question type as one of: compare, explain, summarize, "
+            "define, analysis, fact-based. Then answer using ONLY the CONTEXT. "
+            "CRITICAL RULE: You must ONLY use provided context. If the answer is not in "
+            "context, say 'Not mentioned in the provided context.' "
+            "Answer style rules: "
+            "compare: side-by-side structure and highlight differences; "
+            "explain: structured explanation with headings or logical flow; "
+            "summarize: concise key points only; "
+            "define: one or two sentences; "
+            "analysis: relationships/causes/implications; "
+            "fact-based: direct short answer only. "
+            "Do not add external knowledge."
+        )
+
+        smart_prompt = (
+            "You are a smart document assistant for a PDF-based RAG system. "
+            "First classify the question type as one of: compare, explain, summarize, "
+            "define, analysis, fact-based. Use the CONTEXT as the primary source. "
+            "You may add concise helpful explanations or educational context when it "
+            "clarifies the PDF content. Avoid introducing unrelated facts. "
+            "Answer style rules: "
+            "compare: side-by-side structure and highlight differences; "
+            "explain: structured explanation with headings or logical flow; "
+            "summarize: concise key points only; "
+            "define: one or two sentences; "
+            "analysis: relationships/causes/implications; "
+            "fact-based: direct short answer only."
+        )
+
         prompt = ChatPromptTemplate.from_messages(
             [
                 (
                     "system",
-                    "You are a smart document assistant for a PDF-based RAG system. "
-                    "First classify the question type as one of: compare, explain, summarize, "
-                    "define, analysis, fact-based. Then answer using ONLY the CONTEXT. "
-                    "If the answer is not in context, say 'Not found in the provided documents.' "
-                    "Answer style rules: "
-                    "compare: side-by-side structure and highlight differences; "
-                    "explain: structured explanation with headings or logical flow; "
-                    "summarize: concise key points only; "
-                    "define: one or two sentences; "
-                    "analysis: relationships/causes/implications; "
-                    "fact-based: direct short answer only. "
-                    "Do not add external knowledge."
+                    strict_prompt if strict_mode else smart_prompt
                 ),
                 ("human", "CONTEXT:\n{context}\n\nQUESTION: {question}"),
             ]

@@ -47,6 +47,7 @@ export default function HomePage() {
   const [translateLoading, setTranslateLoading] = useState(false);
   const [translateError, setTranslateError] = useState<string | null>(null);
   const [searchAll, setSearchAll] = useState(true);
+  const [strictMode, setStrictMode] = useState(true);
 
   useEffect(() => {
     listDocs().then(setDocs).catch(() => setDocs([]));
@@ -140,7 +141,8 @@ export default function HomePage() {
       const response = await sendChat({
         doc_id: searchAll ? null : selectedDoc.id,
         message,
-        session_id: sessionId
+        session_id: sessionId,
+        strict_mode: strictMode
       });
       setSessionId(response.session_id);
       setMessages((prev) => [
@@ -352,6 +354,8 @@ export default function HomePage() {
               disabled={docs.length === 0 || (!searchAll && !selectedDoc)}
               searchAll={searchAll}
               onToggleSearchAll={() => setSearchAll((prev) => !prev)}
+              strictMode={strictMode}
+              onToggleStrictMode={() => setStrictMode((prev) => !prev)}
             />
           </div>
           <AnnotationPanel

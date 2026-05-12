@@ -11,7 +11,9 @@ export default function ChatPanel({
   onSend,
   disabled,
   searchAll,
-  onToggleSearchAll
+  onToggleSearchAll,
+  strictMode,
+  onToggleStrictMode
 }: {
   messages: ChatMessage[];
   loading: boolean;
@@ -19,6 +21,8 @@ export default function ChatPanel({
   disabled?: boolean;
   searchAll?: boolean;
   onToggleSearchAll?: () => void;
+  strictMode?: boolean;
+  onToggleStrictMode?: () => void;
 }) {
   const [input, setInput] = useState("");
 
@@ -36,15 +40,26 @@ export default function ChatPanel({
       <div className="border-b border-border px-4 py-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold">Chat</h3>
-          {onToggleSearchAll && (
-            <button
-              type="button"
-              onClick={onToggleSearchAll}
-              className="text-xs font-semibold text-accent"
-            >
-              {searchAll ? "All PDFs" : "Selected PDF"}
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {onToggleStrictMode && (
+              <button
+                type="button"
+                onClick={onToggleStrictMode}
+                className="text-xs font-semibold text-accent"
+              >
+                {strictMode ? "Strict Mode" : "Smart Mode"}
+              </button>
+            )}
+            {onToggleSearchAll && (
+              <button
+                type="button"
+                onClick={onToggleSearchAll}
+                className="text-xs font-semibold text-accent"
+              >
+                {searchAll ? "All PDFs" : "Selected PDF"}
+              </button>
+            )}
+          </div>
         </div>
       </div>
       <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3 scrollbar-thin">

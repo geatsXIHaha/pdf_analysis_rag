@@ -26,6 +26,7 @@ class ChatRequest(BaseModel):
     doc_id: Optional[str] = None
     message: str
     session_id: Optional[str] = None
+    strict_mode: bool = True
 
 
 class ChatResponse(BaseModel):
