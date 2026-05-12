@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "react-pdf/dist/esm/Page/AnnotationLayer.css";
+@import "react-pdf/dist/esm/Page/TextLayer.css";
+
+:root {
+  --canvas: #f6f3ee;
+  --panel: #ffffff;
+  --ink: #1b1b1f;
+  --muted: #6b6b73;
+  --accent: #d9733f;
+  --accent-2: #1f7a8c;
+  --border: #e2ddd4;
+}
+
+.dark {
+  --canvas: #101315;
+  --panel: #151a1f;
+  --ink: #f3f4f6;
+  --muted: #a2aab4;
+  --accent: #f59e6b;
+  --accent-2: #7dd3fc;
+  --border: #2a2f35;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+  background: var(--canvas);
+  color: var(--ink);
+}
+
+.app-shell {
+  background: radial-gradient(circle at top left, rgba(217, 115, 63, 0.08), transparent 55%),
+    radial-gradient(circle at top right, rgba(31, 122, 140, 0.12), transparent 45%),
+    var(--canvas);
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 999px;
+}
+
+.chat-bubble {
+  border-radius: 16px;
+}
+
+.selection-ring {
+  box-shadow: 0 0 0 2px rgba(217, 115, 63, 0.25);
+}
+
+.resize-panel {
+  resize: both;
+  overflow: hidden;
+  min-width: 280px;
+  min-height: 320px;
+}
+
+@keyframes pulse-dots {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.typing-dot {
+  animation: pulse-dots 1.2s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
