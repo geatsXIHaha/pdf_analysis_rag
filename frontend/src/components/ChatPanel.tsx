@@ -9,12 +9,16 @@ export default function ChatPanel({
   messages,
   loading,
   onSend,
-  disabled
+  disabled,
+  searchAll,
+  onToggleSearchAll
 }: {
   messages: ChatMessage[];
   loading: boolean;
   onSend: (message: string) => void;
   disabled?: boolean;
+  searchAll?: boolean;
+  onToggleSearchAll?: () => void;
 }) {
   const [input, setInput] = useState("");
 
@@ -30,7 +34,18 @@ export default function ChatPanel({
   return (
     <div className="panel flex h-full flex-col rounded-2xl shadow-glow">
       <div className="border-b border-border px-4 py-3">
-        <h3 className="text-sm font-semibold">Chat</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold">Chat</h3>
+          {onToggleSearchAll && (
+            <button
+              type="button"
+              onClick={onToggleSearchAll}
+              className="text-xs font-semibold text-accent"
+            >
+              {searchAll ? "All PDFs" : "Selected PDF"}
+            </button>
+          )}
+        </div>
       </div>
       <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3 scrollbar-thin">
         {messages.length === 0 && (
@@ -52,7 +67,9 @@ export default function ChatPanel({
             )}
             {message.citations && message.citations.length > 0 && (
               <div className="mt-2 text-xs text-muted">
-                Sources: {message.citations.map((c) => `p.${c.page}`).join(", ")}
+                Sources: {message.citations
+                  .map((c) => `${c.file || "PDF"} (Page ${c.page})`)
+                  .join(", ")}
               </div>
             )}
           </div>

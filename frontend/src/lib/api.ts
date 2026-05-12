@@ -55,6 +55,23 @@ export async function uploadPdf(file: File): Promise<{ doc_id: string; summary: 
   return response.json();
 }
 
+export async function uploadPdfBatch(files: File[]): Promise<{ doc_id: string; summary: SummaryResult }[]> {
+  const form = new FormData();
+  files.forEach((file) => form.append("files", file));
+
+  const response = await fetch(`${API_BASE}/api/upload/batch`, {
+    method: "POST",
+    body: form
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(detail || "Upload failed");
+  }
+
+  return response.json();
+}
+
 export async function getSummary(docId: string): Promise<SummaryResult> {
   return request<SummaryResult>(`/api/summary/${docId}`);
 }

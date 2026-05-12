@@ -18,7 +18,8 @@ import {
   listDocs,
   sendChat,
   translateText,
-  uploadPdf
+  uploadPdf,
+  uploadPdfBatch
 } from "../lib/api";
 import type {
   Annotation,
@@ -45,6 +46,7 @@ export default function HomePage() {
   const [translation, setTranslation] = useState<string | null>(null);
   const [translateLoading, setTranslateLoading] = useState(false);
   const [translateError, setTranslateError] = useState<string | null>(null);
+  const [searchAll, setSearchAll] = useState(true);
 
   useEffect(() => {
     listDocs().then(setDocs).catch(() => setDocs([]));
@@ -97,6 +99,29 @@ export default function HomePage() {
     }
   };
 
+  const handleUploadBatch = async (files: File[]) => {
+    if (files.length === 0) {
+      return;
+    }
+    setUploading(true);
+    try {
+      const responses = await uploadPdfBatch(files);
+      const updatedDocs = await listDocs();
+      setDocs(updatedDocs);
+      if (!selectedDoc && responses.length > 0) {
+        const matched = updatedDocs.find((doc) => doc.id === responses[0].doc_id) || null;
+        setSelectedDoc(matched);
+        if (responses[0]?.summary) {
+          setSummary(responses[0].summary);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSend = async (message: string) => {
     if (!selectedDoc) {
       return;
@@ -113,7 +138,7 @@ export default function HomePage() {
 
     try {
       const response = await sendChat({
-        doc_id: selectedDoc.id,
+        doc_id: searchAll ? null : selectedDoc.id,
         message,
         session_id: sessionId
       });
@@ -263,7 +288,26 @@ export default function HomePage() {
             Upload PDFs, ask questions, and extract insights instantly.
           </p>
         </div>
-        <ThemeToggle />
+        <div className="flex items-center gap-3">
+          <label className="panel flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium shadow-glow">
+            <span>{uploading ? "Uploading..." : "Upload PDF Files"}</span>
+            <input
+              type="file"
+              accept="application/pdf"
+              multiple
+              className="hidden"
+              onChange={(event) => {
+                const files = Array.from(event.target.files || []);
+                if (files.length > 0) {
+                  handleUploadBatch(files);
+                }
+                event.target.value = "";
+              }}
+              disabled={uploading}
+            />
+          </label>
+          <ThemeToggle />
+        </div>
       </header>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[260px_minmax(0,1fr)_360px]">
@@ -305,7 +349,9 @@ export default function HomePage() {
               messages={messages}
               loading={chatLoading}
               onSend={handleSend}
-              disabled={!selectedDoc}
+              disabled={docs.length === 0 || (!searchAll && !selectedDoc)}
+              searchAll={searchAll}
+              onToggleSearchAll={() => setSearchAll((prev) => !prev)}
             />
           </div>
           <AnnotationPanel

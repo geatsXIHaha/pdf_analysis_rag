@@ -19,10 +19,11 @@ class UploadResponse(BaseModel):
 class SourceCitation(BaseModel):
     page: int
     snippet: str
+    file: str | None = None
 
 
 class ChatRequest(BaseModel):
-    doc_id: str
+    doc_id: Optional[str] = None
     message: str
     session_id: Optional[str] = None
 

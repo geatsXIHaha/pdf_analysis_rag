@@ -79,6 +79,31 @@ async def upload_pdf(file: UploadFile = File(...)) -> UploadResponse:
     )
 
 
+@router.post("/upload/batch", response_model=list[UploadResponse])
+async def upload_pdfs(files: list[UploadFile] = File(...)) -> list[UploadResponse]:
+    responses: list[UploadResponse] = []
+    for file in files:
+        if file.content_type != "application/pdf":
+            raise HTTPException(status_code=400, detail=f"Only PDF files are supported: {file.filename}")
+        doc_id = str(uuid4())
+        try:
+            meta, summary = await ingest_pdf(doc_id, file)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail="Failed to ingest PDF") from exc
+
+        responses.append(
+            UploadResponse(
+                doc_id=meta["id"],
+                filename=meta["filename"],
+                pages=meta["pages"],
+                summary=SummaryResult(**summary),
+            )
+        )
+    return responses
+
+
 @router.get("/summary/{doc_id}", response_model=SummaryResult)
 def summary_get(doc_id: str) -> SummaryResult:
     summary = load_summary(doc_id)

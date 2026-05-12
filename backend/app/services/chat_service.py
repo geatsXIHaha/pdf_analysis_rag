@@ -24,14 +24,15 @@ class ChatService:
             )
         return self.memories[session_id]
 
-    def ask(self, doc_id: str, question: str, session_id: str | None = None) -> Dict:
+    def ask(self, doc_id: str | None, question: str, session_id: str | None = None) -> Dict:
         session_id = session_id or str(uuid4())
         memory = self._get_memory(session_id)
 
+        search_filter = {"doc_id": doc_id} if doc_id else None
         results = self.vectorstore.similarity_search_with_score(
             question,
-            k=4,
-            filter={"doc_id": doc_id},
+            k=6,
+            filter=search_filter,
         )
         print(f"[chat] retrieved {len(results)} chunks for doc_id={doc_id}")
         for idx, (doc, score) in enumerate(results, start=1):
@@ -81,10 +82,16 @@ class ChatService:
             raise RuntimeError("Chat request failed") from exc
 
         sources = []
+        seen = set()
         for doc, _score in results:
             page = doc.metadata.get("page", doc.metadata.get("page_number", 0)) + 1
+            filename = doc.metadata.get("filename")
+            key = (filename, page)
+            if key in seen:
+                continue
+            seen.add(key)
             snippet = doc.page_content.strip().replace("\n", " ")[:240]
-            sources.append({"page": page, "snippet": snippet})
+            sources.append({"page": page, "snippet": snippet, "file": filename})
 
         return {
             "answer": result.get("answer", ""),

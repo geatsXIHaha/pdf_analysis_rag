@@ -15,6 +15,7 @@ export type PdfDoc = {
 export type Citation = {
   page: number;
   snippet: string;
+  file?: string | null;
 };
 
 export type ChatMessage = {

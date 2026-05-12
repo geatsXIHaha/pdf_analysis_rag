@@ -18,7 +18,7 @@ async def ingest_pdf(doc_id: str, file: UploadFile) -> Tuple[Dict, Dict]:
     try:
         path, filename = await _save_file(doc_id, file)
         pages = _load_pages(path)
-        chunks = _chunk_pages(doc_id, pages)
+        chunks = _chunk_pages(doc_id, filename, pages)
         add_documents(chunks)
         summary = generate_summary(doc_id, pages)
 
@@ -48,11 +48,17 @@ def _load_pages(path: str):
         raise ValueError("Failed to read PDF") from exc
 
 
-def _chunk_pages(doc_id: str, pages):
+def _chunk_pages(doc_id: str, filename: str, pages):
     for page in pages:
         page.metadata["doc_id"] = doc_id
+        page.metadata["filename"] = filename
     splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
-    return splitter.split_documents(pages)
+    chunks = splitter.split_documents(pages)
+    for idx, chunk in enumerate(chunks, start=1):
+        chunk.metadata["doc_id"] = doc_id
+        chunk.metadata["filename"] = filename
+        chunk.metadata["chunk_id"] = f"{doc_id}-{idx}"
+    return chunks
 
 
 def _cleanup_partial(doc_id: str, path: str | None) -> None:
