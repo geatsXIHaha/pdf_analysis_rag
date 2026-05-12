@@ -97,10 +97,13 @@ export async function deletePin(docId: string, annotationId: string): Promise<An
   return data.items;
 }
 
-export async function translateText(text: string): Promise<string> {
+export async function translateText(text: string, targetLanguage?: string): Promise<string> {
+  const payload = { text, targetLanguage: targetLanguage || "zh-CN" };
+  console.log("[translate] payload", payload);
   const data = await request<{ translation: string }>("/api/translate", {
     method: "POST",
-    body: JSON.stringify({ text })
+    body: JSON.stringify(payload)
   });
+  console.log("[translate] response", data.translation);
   return data.translation;
 }

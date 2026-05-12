@@ -135,17 +135,16 @@ export default function PdfViewer({
                 const page = index + 1;
                 const pageHighlights = (highlights || []).filter((item) => item.page === page);
                 return (
-                  <div
-                    key={page}
-                    ref={(node) => {
-                      if (node) {
-                        pageRefs.current.set(page, node);
-                      }
-                    }}
-                    data-page={page}
-                    className="relative mb-6 flex justify-center"
-                  >
-                    <div className="relative">
+                  <div key={page} className="relative mb-6 flex justify-center">
+                    <div
+                      ref={(node) => {
+                        if (node) {
+                          pageRefs.current.set(page, node);
+                        }
+                      }}
+                      data-page={page}
+                      className="relative"
+                    >
                       <Page
                         pageNumber={page}
                         scale={zoom}
@@ -155,7 +154,7 @@ export default function PdfViewer({
                       {pageHighlights.map((item) => (
                         <div
                           key={item.id}
-                          className="absolute bg-accent/25"
+                          className="absolute bg-yellow-300/60 pointer-events-none"
                           style={{
                             left: `${item.rect.x * 100}%`,
                             top: `${item.rect.y * 100}%`,

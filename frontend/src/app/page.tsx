@@ -44,6 +44,7 @@ export default function HomePage() {
   const [selection, setSelection] = useState<SelectionInfo | null>(null);
   const [translation, setTranslation] = useState<string | null>(null);
   const [translateLoading, setTranslateLoading] = useState(false);
+  const [translateError, setTranslateError] = useState<string | null>(null);
 
   useEffect(() => {
     listDocs().then(setDocs).catch(() => setDocs([]));
@@ -147,6 +148,7 @@ export default function HomePage() {
       });
       setAnnotations(updated);
       setSelection(null);
+      window.getSelection()?.removeAllRanges();
       return;
     }
 
@@ -164,6 +166,7 @@ export default function HomePage() {
     };
     setHighlights((prev) => [...prev, highlight]);
     setSelection(null);
+    window.getSelection()?.removeAllRanges();
   };
 
   const findHighlightIndex = (selection: SelectionInfo) => {
@@ -186,18 +189,27 @@ export default function HomePage() {
     }
     setHighlights((prev) => prev.filter((_, idx) => idx !== index));
     setSelection(null);
+    window.getSelection()?.removeAllRanges();
   };
 
   const handleTranslate = async () => {
-    if (!selection) {
+    const text = window.getSelection()?.toString().trim() || "";
+    if (!text) {
+      setTranslateError("Please select text to translate.");
       return;
     }
+    console.log("[translate] selectedText", text);
     setTranslateLoading(true);
+    setTranslateError(null);
     try {
-      const result = await translateText(selection.text);
+      const result = await translateText(text, "zh-CN");
       setTranslation(result);
+      setSelection(null);
+      window.getSelection()?.removeAllRanges();
     } catch (error) {
       console.error(error);
+      setSelection(null);
+      window.getSelection()?.removeAllRanges();
     } finally {
       setTranslateLoading(false);
     }
@@ -324,6 +336,12 @@ export default function HomePage() {
       {translateLoading && (
         <div className="fixed bottom-6 right-6 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white">
           Translating...
+        </div>
+      )}
+
+      {translateError && (
+        <div className="fixed bottom-6 right-6 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white">
+          {translateError}
         </div>
       )}
     </div>

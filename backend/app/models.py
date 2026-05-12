@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
 
 
@@ -35,6 +35,9 @@ class ChatResponse(BaseModel):
 
 class TranslateRequest(BaseModel):
     text: str
+    target_language: str | None = Field(default=None, alias="targetLanguage")
+
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class TranslateResponse(BaseModel):

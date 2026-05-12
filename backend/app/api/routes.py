@@ -128,5 +128,9 @@ def annotations_delete(doc_id: str, annotation_id: str) -> AnnotationResponse:
 
 @router.post("/translate", response_model=TranslateResponse)
 def translate(payload: TranslateRequest) -> TranslateResponse:
-    translation = translate_text(payload.text)
+    print(
+        f"[translate] text_len={len(payload.text)} target={payload.target_language or 'zh'}"
+    )
+    translation = translate_text(payload.text, payload.target_language)
+    print(f"[translate] response_len={len(translation)}")
     return TranslateResponse(translation=translation)
